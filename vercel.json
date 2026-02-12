@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "redirects": [{ "source": "/", "destination": "/index.html", "permanent": false }],
   "functions": {
     "server.js": {
       "includeFiles": "public/**"
     }
   },
   "routes": [
-    { "src": "/(api|auth|slack)(.*)", "dest": "/server.js" },
+    { "src": "^/$", "dest": "/index.html" },
+    { "src": "^/(api|auth|slack)(/.*)?$", "dest": "/server.js" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
