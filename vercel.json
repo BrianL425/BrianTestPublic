@@ -1,9 +1,9 @@
 {
   "version": 2,
   "functions": {
-    "api/[...path].js": {
+    "server.js": {
       "includeFiles": "public/**"
     }
   },
-  "rewrites": [{ "source": "/(.*)", "destination": "/api/$1" }]
+  "routes": [{ "src": "/(.*)", "dest": "server.js" }]
 }
