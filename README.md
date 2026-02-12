@@ -47,6 +47,27 @@ After deploy:
   - Slash command: `https://<your-render-domain>/slack/commands`
   - Interactivity: `https://<your-render-domain>/slack/interactions`
 
+## Deploy on Vercel (GitHub)
+1. In Vercel, click **Add New** -> **Project**.
+2. Import repo: `BrianL425/BrianTestPublic`.
+3. Keep defaults (this repo includes `vercel.json` and `api/index.js`).
+4. Add environment variables:
+   - `OPENAI_API_KEY`
+   - `OPENAI_MODEL` = `gpt-4o-mini`
+   - `SPOTIFY_CLIENT_ID`
+   - `SPOTIFY_CLIENT_SECRET`
+   - `SPOTIFY_REDIRECT_URI` = `https://<your-vercel-domain>/auth/spotify/callback`
+   - `SLACK_BOT_TOKEN`
+   - `SLACK_SIGNING_SECRET`
+5. Deploy. You will get URL like `https://briantestpublic.vercel.app`.
+
+After Vercel deploy:
+- Spotify redirect URI:
+  - `https://<your-vercel-domain>/auth/spotify/callback`
+- Slack endpoints:
+  - Slash command: `https://<your-vercel-domain>/slack/commands`
+  - Interactivity: `https://<your-vercel-domain>/slack/interactions`
+
 ## Environment variables
 - `OPENAI_API_KEY`: OpenAI key
 - `OPENAI_MODEL`: defaults to `gpt-4o-mini`

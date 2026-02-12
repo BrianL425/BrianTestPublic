@@ -904,6 +904,10 @@ app.post('/api/debug/spotify', async (_req, res) => {
   });
 });
 
-app.listen(Number(PORT), () => {
-  console.log(`Server running at http://127.0.0.1:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(Number(PORT), () => {
+    console.log(`Server running at http://127.0.0.1:${PORT}`);
+  });
+}
+
+export default app;
