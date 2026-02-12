@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "redirects": [{ "source": "/", "destination": "/index.html", "permanent": false }],
   "functions": {
     "server.js": {
       "includeFiles": "public/**"
