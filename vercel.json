@@ -1,4 +1,13 @@
 {
   "version": 2,
-  "routes": [{ "src": "/(api|auth|slack)(.*)", "dest": "server.js" }]
+  "functions": {
+    "server.js": {
+      "includeFiles": "public/**"
+    }
+  },
+  "routes": [
+    { "src": "/(api|auth|slack)(.*)", "dest": "/server.js" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
