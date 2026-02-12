@@ -26,13 +26,34 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const publicDir = path.join(__dirname, 'public');
+const rootIndexPath = path.join(__dirname, 'index.html');
+const rootAppJsPath = path.join(__dirname, 'app.js');
+const rootStylesPath = path.join(__dirname, 'styles.css');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
 app.use(express.static(publicDir));
 
 app.get('/', (_req, res) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
+  if (process.env.VERCEL) {
+    return res.sendFile(rootIndexPath);
+  }
+  return res.sendFile(path.join(publicDir, 'index.html'));
+});
+
+app.get('/app.js', (_req, res) => {
+  if (process.env.VERCEL) {
+    return res.sendFile(rootAppJsPath);
+  }
+  return res.sendFile(path.join(publicDir, 'app.js'));
+});
+
+app.get('/styles.css', (_req, res) => {
+  if (process.env.VERCEL) {
+    return res.sendFile(rootStylesPath);
+  }
+  return res.sendFile(path.join(publicDir, 'styles.css'));
 });
 
 const session = {

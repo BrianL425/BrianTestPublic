@@ -2,13 +2,14 @@
   "version": 2,
   "functions": {
     "server.js": {
-      "includeFiles": "public/**"
+      "includeFiles": "{public/**,index.html,app.js,styles.css}"
     }
   },
   "routes": [
-    { "src": "^/$", "dest": "/index.html" },
     { "src": "^/(api|auth|slack)(/.*)?$", "dest": "/server.js" },
+    { "src": "^/$", "dest": "/server.js" },
+    { "src": "^/(app\\.js|styles\\.css|favicon\\.ico)$", "dest": "/server.js" },
     { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/(.*)", "dest": "/server.js" }
   ]
 }
