@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import crypto from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import OpenAI from 'openai';
 
@@ -21,10 +23,17 @@ if (!OPENAI_API_KEY || !SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET) {
 
 const app = express();
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const publicDir = path.join(__dirname, 'public');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(express.static(publicDir));
+
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(publicDir, 'index.html'));
+});
 
 const session = {
   state: null,
