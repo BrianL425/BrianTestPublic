@@ -11,8 +11,12 @@ const {
   SPOTIFY_CLIENT_ID,
   SPOTIFY_CLIENT_SECRET,
   SPOTIFY_REDIRECT_URI = 'http://127.0.0.1:3000/auth/spotify/callback',
+  SPOTIFY_SHARED_REFRESH_TOKEN = '',
+  SPOTIFY_SHARED_USER_ID = '',
+  SPOTIFY_SHARED_USER_EMAIL = '',
   SLACK_BOT_TOKEN = '',
   SLACK_SIGNING_SECRET = '',
+  APP_SESSION_SECRET = '',
   PORT = 3000
 } = process.env;
 
@@ -29,9 +33,16 @@ const publicDir = path.join(__dirname, 'public');
 const rootIndexPath = path.join(__dirname, 'index.html');
 const rootAppJsPath = path.join(__dirname, 'app.js');
 const rootStylesPath = path.join(__dirname, 'styles.css');
+const COOKIE_SESSION = 'autify_spotify_session';
+const COOKIE_OAUTH_STATE = 'autify_spotify_oauth_state';
+const SESSION_SECRET = APP_SESSION_SECRET || SLACK_SIGNING_SECRET || 'autify-dev-secret';
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use((req, _res, next) => {
+  hydrateSessionFromRequest(req);
+  next();
+});
 app.use(express.static(__dirname));
 app.use(express.static(publicDir));
 
@@ -57,7 +68,6 @@ app.get('/styles.css', (_req, res) => {
 });
 
 const session = {
-  state: null,
   accessToken: null,
   refreshToken: null,
   expiresAt: 0,
@@ -67,6 +77,90 @@ const session = {
 };
 
 const pendingSlackApprovals = new Map();
+
+function parseCookies(cookieHeader) {
+  const out = {};
+  const source = String(cookieHeader || '');
+  for (const item of source.split(';')) {
+    const trimmed = item.trim();
+    if (!trimmed) continue;
+    const idx = trimmed.indexOf('=');
+    if (idx <= 0) continue;
+    const key = trimmed.slice(0, idx).trim();
+    const val = trimmed.slice(idx + 1).trim();
+    out[key] = decodeURIComponent(val);
+  }
+  return out;
+}
+
+function buildSetCookie(name, value, options = {}) {
+  const parts = [`${name}=${encodeURIComponent(value)}`];
+  const {
+    maxAge,
+    path: cookiePath = '/',
+    httpOnly = true,
+    secure = Boolean(process.env.VERCEL),
+    sameSite = 'Lax'
+  } = options;
+  if (Number.isFinite(maxAge)) parts.push(`Max-Age=${Math.floor(maxAge)}`);
+  if (cookiePath) parts.push(`Path=${cookiePath}`);
+  if (httpOnly) parts.push('HttpOnly');
+  if (secure) parts.push('Secure');
+  if (sameSite) parts.push(`SameSite=${sameSite}`);
+  return parts.join('; ');
+}
+
+function hmacSign(payload) {
+  return crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url');
+}
+
+function encodeSignedJson(obj) {
+  const payload = Buffer.from(JSON.stringify(obj)).toString('base64url');
+  return `${payload}.${hmacSign(payload)}`;
+}
+
+function decodeSignedJson(value) {
+  if (!value || !value.includes('.')) return null;
+  const [payload, sig] = value.split('.', 2);
+  if (!payload || !sig) return null;
+  const expected = hmacSign(payload);
+  const sigBuf = Buffer.from(sig);
+  const expBuf = Buffer.from(expected);
+  if (sigBuf.length !== expBuf.length) return null;
+  if (!crypto.timingSafeEqual(sigBuf, expBuf)) return null;
+  try {
+    return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function setSpotifySessionCookie(res, spotifyData) {
+  const token = encodeSignedJson({
+    refreshToken: spotifyData.refreshToken,
+    userId: spotifyData.userId || null,
+    userEmail: spotifyData.userEmail || null,
+    scope: spotifyData.scope || null
+  });
+  res.append('Set-Cookie', buildSetCookie(COOKIE_SESSION, token, { maxAge: 60 * 60 * 24 * 30 }));
+}
+
+function clearCookie(res, name) {
+  res.append('Set-Cookie', buildSetCookie(name, '', { maxAge: 0 }));
+}
+
+function hydrateSessionFromRequest(req) {
+  const cookies = parseCookies(req.headers.cookie);
+  const signedSession = decodeSignedJson(cookies[COOKIE_SESSION]);
+  const fallbackRefreshToken = SPOTIFY_SHARED_REFRESH_TOKEN || null;
+
+  session.accessToken = null;
+  session.expiresAt = 0;
+  session.refreshToken = signedSession?.refreshToken || fallbackRefreshToken;
+  session.userId = signedSession?.userId || SPOTIFY_SHARED_USER_ID || null;
+  session.userEmail = signedSession?.userEmail || SPOTIFY_SHARED_USER_EMAIL || null;
+  session.scope = signedSession?.scope || null;
+}
 
 const EMERGENCY_FALLBACK_TRACKS = [
   { title: 'Blinding Lights', artist: 'The Weeknd' },
@@ -357,7 +451,7 @@ async function buildMatchedTrackPool({ description, desiredCount, seedCandidates
 }
 
 function isConnected() {
-  return Boolean(session.accessToken && session.userId);
+  return Boolean(session.refreshToken);
 }
 
 function parseSpotifyErrorMessage(err) {
@@ -469,7 +563,7 @@ app.get('/healthz', (_req, res) => {
 
 app.get('/auth/spotify', (_req, res) => {
   const state = crypto.randomUUID();
-  session.state = state;
+  res.append('Set-Cookie', buildSetCookie(COOKIE_OAUTH_STATE, state, { maxAge: 60 * 10 }));
 
   const params = new URLSearchParams({
     response_type: 'code',
@@ -485,10 +579,13 @@ app.get('/auth/spotify', (_req, res) => {
 app.get('/auth/spotify/callback', async (req, res) => {
   try {
     const { code, state } = req.query;
+    const cookies = parseCookies(req.headers.cookie);
+    const savedState = cookies[COOKIE_OAUTH_STATE];
 
-    if (!code || !state || state !== session.state) {
+    if (!code || !state || !savedState || state !== savedState) {
       return res.status(400).send('Invalid Spotify OAuth callback');
     }
+    clearCookie(res, COOKIE_OAUTH_STATE);
 
     const body = new URLSearchParams({
       grant_type: 'authorization_code',
@@ -512,15 +609,21 @@ app.get('/auth/spotify/callback', async (req, res) => {
 
     const tokenData = await tokenResp.json();
     session.accessToken = tokenData.access_token;
-    session.refreshToken = tokenData.refresh_token;
+    session.refreshToken = tokenData.refresh_token || session.refreshToken;
     session.expiresAt = Date.now() + tokenData.expires_in * 1000;
     session.scope = tokenData.scope || null;
 
     const me = await spotifyRequest('/me');
     session.userId = me.id;
     session.userEmail = me.email || null;
+    setSpotifySessionCookie(res, {
+      refreshToken: session.refreshToken,
+      userId: session.userId,
+      userEmail: session.userEmail,
+      scope: session.scope
+    });
 
-    res.redirect('/?connected=1');
+    res.redirect('/index.html?connected=1');
   } catch (err) {
     console.error(err);
     res.status(500).send(err.message);

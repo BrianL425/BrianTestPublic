@@ -74,8 +74,12 @@ After Vercel deploy:
 - `SPOTIFY_CLIENT_ID`: Spotify client ID
 - `SPOTIFY_CLIENT_SECRET`: Spotify client secret
 - `SPOTIFY_REDIRECT_URI`: OAuth callback URL
+- `SPOTIFY_SHARED_REFRESH_TOKEN`: optional shared Spotify refresh token for server-to-server usage (Slack on Vercel)
+- `SPOTIFY_SHARED_USER_ID`: optional shared Spotify user id
+- `SPOTIFY_SHARED_USER_EMAIL`: optional shared Spotify email label
 - `SLACK_BOT_TOKEN`: Slack bot token (for slash command integration)
 - `SLACK_SIGNING_SECRET`: Slack signing secret (optional, reserved for request verification hardening)
+- `APP_SESSION_SECRET`: secret used to sign auth cookies on serverless runtimes
 - `PORT`: server port (default 3000)
 
 ## What the app does
