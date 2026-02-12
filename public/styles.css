@@ -1,0 +1,242 @@
+:root {
+  --bg: #121212;
+  --surface: #181818;
+  --surface-2: #212121;
+  --line: #2a2a2a;
+  --text: #ffffff;
+  --muted: #b3b3b3;
+  --accent: #1db954;
+  --accent-strong: #1ed760;
+  --shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Helvetica Neue', 'Segoe UI', sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top right, rgba(29, 185, 84, 0.16), transparent 40%),
+    radial-gradient(circle at left top, rgba(30, 215, 96, 0.1), transparent 34%),
+    var(--bg);
+}
+
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px 18px 44px;
+}
+
+.hero {
+  margin-bottom: 14px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent);
+  letter-spacing: 0.14em;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 8px 0 0;
+  font-size: clamp(2rem, 4vw, 3.1rem);
+  line-height: 1.05;
+}
+
+.sub {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 1.08rem;
+}
+
+.card {
+  background: linear-gradient(180deg, var(--surface) 0%, #161616 100%);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 14px;
+  box-shadow: var(--shadow);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.row-buttons {
+  gap: 10px;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.96rem;
+  color: #e6e6e6;
+}
+
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+input,
+textarea,
+button {
+  font: inherit;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  padding: 11px 12px;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.22);
+}
+
+button {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  color: #09150d;
+  background: var(--accent);
+  font-weight: 700;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.btn-ghost {
+  color: var(--text);
+  background: #252525;
+  border: 1px solid #3a3a3a;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.hidden {
+  display: none;
+}
+
+pre {
+  white-space: pre-wrap;
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  background: #101010;
+  border: 1px solid #2d2d2d;
+  border-radius: 10px;
+  padding: 12px;
+  color: #f1f1f1;
+}
+
+a {
+  color: var(--accent-strong);
+}
+
+#status,
+#diagStatus {
+  color: var(--muted);
+}
+
+.preview-list {
+  margin: 0;
+  padding-left: 1.3rem;
+  display: grid;
+  gap: 10px;
+}
+
+.preview-list li {
+  border: 1px solid #2e2e2e;
+  border-radius: 10px;
+  padding: 10px;
+  background: #111;
+}
+
+.chip {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.chip-ok {
+  background: rgba(29, 185, 84, 0.2);
+  color: #80f7a9;
+  border: 1px solid rgba(29, 185, 84, 0.5);
+}
+
+.chip-miss {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d6d6d6;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.preview-requested {
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.preview-match {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  color: #a9a9a9;
+}
+
+@media (max-width: 700px) {
+  .wrap {
+    padding: 22px 12px 34px;
+  }
+
+  .card {
+    padding: 13px;
+  }
+
+  .row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .row-buttons {
+    width: 100%;
+  }
+
+  .row-buttons button {
+    width: 100%;
+  }
+}

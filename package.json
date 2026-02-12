@@ -1,0 +1,16 @@
+{
+  "name": "spotify-autify",
+  "version": "1.0.0",
+  "description": "Generate Spotify playlists from natural language using OpenAI",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "openai": "^4.56.0"
+  }
+}

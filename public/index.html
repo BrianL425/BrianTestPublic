@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Autify</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="hero">
+        <p class="eyebrow">AUTIFY</p>
+        <h1>Spotify Autify</h1>
+        <p class="sub">Describe the vibe. Preview the tracklist. Approve and create in Spotify.</p>
+      </header>
+
+      <section class="card">
+        <div class="row">
+          <button id="spotifyConnect" class="btn-primary">Connect Spotify</button>
+          <span id="status">Checking connection...</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="row">
+          <button id="runDiagnostics" class="btn-ghost">Run Spotify Diagnostics</button>
+          <span id="diagStatus">Methodical API checks with step-by-step output.</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <form id="playlistForm">
+          <label>
+            Playlist name
+            <input id="playlistName" required placeholder="Late Night Coding" />
+          </label>
+
+          <label>
+            Folder name (label prefix)
+            <input id="folderName" placeholder="Focus" />
+          </label>
+
+          <label>
+            Description
+            <textarea
+              id="description"
+              required
+              rows="5"
+              placeholder="Warm, mellow indie + electronic for deep focus after 10pm"
+            ></textarea>
+          </label>
+
+          <label>
+            Track count (5-50)
+            <input id="trackCount" type="number" min="5" max="50" value="20" />
+          </label>
+
+          <label class="inline">
+            <input id="isPublic" type="checkbox" />
+            Make playlist public
+          </label>
+
+          <div class="row row-buttons">
+            <button type="button" id="previewBtn" class="btn-primary">Preview Tracklist</button>
+            <button type="submit" id="createBtn" class="btn-primary" disabled>Create Playlist in Spotify</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="preview" class="card hidden"></section>
+      <section id="result" class="card hidden"></section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
